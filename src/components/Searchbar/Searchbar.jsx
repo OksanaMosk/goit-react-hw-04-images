@@ -1,51 +1,46 @@
-
-import { Component } from 'react';
+import { useState } from 'react';
 import Notiflix from 'notiflix';
-import css from './Searchbar.module.css'
+import css from './Searchbar.module.css';
 
-export class Searchbar  extends Component {
-    state = {
-       query:'',
+const Searchbar = ({ onSubmit }) => {
+  const { query, setQuery } = useState('');
+
+  const handleChange = event => {
+    const query = event.currentTarget.value;
+    setQuery({ query: query });
+  };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+
+    if (query.trim() === '') {
+      return Notiflix.Notify.warning('Please enter word for search');
     }
 
+    onSubmit(query);
+    setQuery({ query: '' });
+  };
 
-    handleChange = event => {
-        const query = event.currentTarget.value;
-        this.setState({ query: query });
-    };
-  
-  
-    handleSubmit = event => {
-        event.preventDefault();
-        
+  return (
+    <header className={css.searchbar}>
+      <form className={css.form} onSubmit={handleSubmit}>
+        <button type="submit" className={css.button}>
+          <span className={css.buttonLabel}>Search</span>
+          &#128269;
+        </button>
 
-  if (this.state.query.trim() === '') {
-      return Notiflix.Notify.warning(
-        'Please enter word for search');
-        }
-        
-        this.props.onSubmit(this.state)
-        this.setState({ query: ''});
-    };
-    
+        <input
+          className={css.input}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          onChange={handleChange}
+          value={query}
+        />
+      </form>
+    </header>
+  );
+};
 
-
-
- render (){
-     return (
-         <header className={css.searchbar}>
-             <form className={css.form} onSubmit={this.handleSubmit}>
-                 <button
-                     type="submit" className={css.button}>
-                 
-                     <span className={css.buttonLabel}>Search</span>
-                     &#128269;
-                 </button>
-
-                 <input className={css.input} type="text" autoComplete="off" autoFocus placeholder="Search images and photos" onChange={this.handleChange}  value={this.state.query}
-                 />
-             </form>
-         </header>
-     )
- }    
-}
+export default Searchbar;

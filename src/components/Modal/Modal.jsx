@@ -1,7 +1,6 @@
-
-import { Component } from "react";
+import { Component } from 'react';
 import css from './Modal.module.css';
-import { createPortal } from "react-dom";
+import { createPortal } from 'react-dom';
 
 const modalRoot = document.querySelector('#root');
 class Modal extends Component {
@@ -25,13 +24,16 @@ class Modal extends Component {
     }
   };
 
-
-render() {
-    return createPortal (
+  render() {
+    return createPortal(
       <div className={css.overlay} onClick={this.backdropClick}>
         <div className={css.modal}>
-          <img className={css.modalPicture} src={this.props.src} alt={this.props.alt} />
-          <p className={css.modalTag }>{this.props.alt}</p>
+          <img
+            className={css.modalPicture}
+            src={this.props.src}
+            alt={this.props.alt}
+          />
+          <p className={css.modalTag}>{this.props.alt}</p>
         </div>
       </div>,
       modalRoot

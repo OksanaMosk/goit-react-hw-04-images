@@ -1,132 +1,116 @@
-
-import React, { Component } from "react";
 import { fetchPhoto } from './Services/FetchPhoto';
-import { Searchbar } from "./Searchbar/Searchbar";
+import Searchbar from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Button }  from './Button/Button';
+import { Button } from './Button/Button';
 import Modal from './Modal/Modal';
 
 import Loader from './Loader/Loader';
-import Notiflix from "notiflix";
+import Notiflix from 'notiflix';
 import css from './App.module.css';
+import { useState, useEffect } from 'react';
 
+const App = () => {
+  const { searchPhoto, setSearchPhoto } = useState('');
+  const { page, setPage } = useState(1);
+  const { photos, setPhotos } = useState([]);
+  const { isLoading, setIsLoading } = useState(false);
+  const { showLoadMore, setShowLoadMore } = useState(false);
+  const { showModal, setShowModal } = useState(false);
+  const { imageTags, setImageTags } = useState(null);
+  const { largeImageURL, setLargeImageURL } = useState([]);
 
+  // state = {
+  //   searchPhoto: '',
+  //   page: 1,
+  //   photos: [],
+  //   isLoading: false,
+  //   showLoadMore: false,
+  //   showModal: false,
+  //   imageTags: null,
+  //   largeImageURL: [],
 
-export class App extends Component {
-  state = {
-    searchPhoto: '',
-    page: 1,
-    photos: [],
-    isLoading: false,
-    showLoadMore: false,
-    showModal: false,
-    imageTags: null,
-    largeImageURL: [],
-  }
+  // componentDidUpdate(_, prevState) {
+  //   if (
+  //     this.state.searchPhoto !== prevState.searchPhoto ||
+  //     this.state.page !== prevState.page
+  //   ) {
+  //     this.setState({ isLoading: true });
+  //     this.fetchResult(this.state.searchPhoto, this.state.page);
+  //   }
+  // }
 
-
-
-componentDidUpdate(_, prevState) {
-
-    if (this.state.searchPhoto !== prevState.searchPhoto ||
-      this.state.page !== prevState.page
-    ) {
-      this.setState({ isLoading: true });
-      this.fetchResult(this.state.searchPhoto, this.state.page);
+  useEffect(() => {
+    if (!searchPhoto) {
+      return;
     }
-  }
+    setIsLoading(true);
+    fetchResult(searchPhoto, page);
+  }, [searchPhoto, page]);
 
-
-
- onSubmit = FormData => {
-    const { query } = FormData;
-    this.setState({ searchPhoto: query, page: 1, photos: [] })
-}
-
-
-  async fetchResult(query, page) {
+  async function fetchResult(query, page) {
     try {
       await fetchPhoto(query, page).then(result => {
         const data = result.data;
         const photos = data.hits;
         const total = data.totalHits;
-        const lastPhotos = total - 12 * this.state.page;
+        const lastPhotos = total - 12 * page;
 
         if (photos.length === 0) {
-          this.setState({ showLoadMore: false });
+          setShowModal(false);
           Notiflix.Notify.failure(
-            'Sorry, there are no images. Please try again.' );
+            'Sorry, there are no images. Please try again.'
+          );
           return;
         } else {
-          this.setState(prevState => ({
-            photos: [...prevState.photos, ...photos],
-          }));
+          setPhotos(prevPhotos => [...prevPhotos, ...photos]);
         }
-          lastPhotos > 0
-          ? this.setState({ showLoadMore: true })
-          : this.setState({ showLoadMore: false });
-        if (photos.length > 0 && this.state.page === 1) {
-          Notiflix.Notify.success(
-            `Yeeesss! We found ${total} images.`);
+        lastPhotos > 0 ? setShowLoadMore(true) : setShowLoadMore(false);
+        if (photos.length > 0 && page === 1) {
+          Notiflix.Notify.success(`Yeeesss! We found ${total} images.`);
         }
-
-       
-      
       });
     } catch (error) {
-
-        Notiflix.Notify.failure(
-        ' Oooops...Some error occured...');
-     
+      Notiflix.Notify.failure(' Oooops...Some error occured...');
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
-    }
-
-
-   onLoadMoreClick = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-    };
-
-   toggleModal = (largeImageURL, imageTags) => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-      largeImageURL: largeImageURL,
-      imageTags: imageTags,
-    }));
-   };
-
-   
-
-  render() {
-    return (
-    
-   <div >
-      <Searchbar onSubmit={this.onSubmit} />
-          <div className={css.container}>  
-          {this.state.isLoading && <Loader />}
-          <ImageGallery
-                  items={this.state.photos}
-                  showModal={this.toggleModal}
-            />
-                {this.state.showLoadMore && (
-          <Button
-                   onClick={this.onLoadMoreClick}
-            />
-                  )}  
-        </div>
-      
-        {this.state.showModal && (
-          <Modal
-            src={this.state.largeImageURL}
-            alt={this.state.imageTags}
-            closeModal={this.toggleModal}
-          
-          />
-        )}
-   </div>
-  );  
   }
-}
+
+  const onSubmit = FormData => {
+    const { query } = FormData;
+    setSearchPhoto({ searchPhoto: query, page: 1, photos: [] });
+  };
+
+  // const onSubmit = query => {
+  //   setSearchPhoto(query);
+  //   page(1);
+  //   photos([]);
+  // };
+
+  const onLoadMoreClick = () => {
+    setPage(prevPage => prevPage + 1);
+  };
+
+  const toggleModal = (largeImageURL, imageTags) => {
+    setShowModal(!showModal);
+    setLargeImageURL(largeImageURL);
+    setImageTags(imageTags);
+  };
+
+  return (
+    <div>
+      <Searchbar onSubmit={onSubmit} />
+      <div className={css.container}>
+        {isLoading && <Loader />}
+        <ImageGallery items={photos} showModal={toggleModal} />
+        {showLoadMore && <Button onClick={onLoadMoreClick} />}
+      </div>
+
+      {showModal && (
+        <Modal src={largeImageURL} alt={imageTags} closeModal={toggleModal} />
+      )}
+    </div>
+  );
+};
+
+export default App;
