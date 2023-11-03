@@ -1,7 +1,7 @@
-import { fetchPhoto } from './Services/FetchPhoto';
+import fetchPhoto from './Services/FetchPhoto';
 import Searchbar from './Searchbar/Searchbar';
-import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Button } from './Button/Button';
+import ImageGallery from './ImageGallery/ImageGallery';
+import Button from './Button/Button';
 import Modal from './Modal/Modal';
 import React from 'react';
 
@@ -20,38 +20,17 @@ const App = () => {
   const [imageTags, setImageTags] = useState(null);
   const [largeImageURL, setLargeImageURL] = useState([]);
 
-  // state = {
-  //   searchPhoto: '',
-  //   page: 1,
-  //   photos: [],
-  //   isLoading: false,
-  //   showLoadMore: false,
-  //   showModal: false,
-  //   imageTags: null,
-  //   largeImageURL: [],
-
-  // componentDidUpdate(_, prevState) {
-  //   if (
-  //     this.state.searchPhoto !== prevState.searchPhoto ||
-  //     this.state.page !== prevState.page
-  //   ) {
-  //     this.setState({ isLoading: true });
-  //     this.fetchResult(this.state.searchPhoto, this.state.page);
-  //   }
-  // }
-
   useEffect(() => {
     if (!searchPhoto) {
       return;
     }
     setIsLoading(true);
     fetchResult(searchPhoto, page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchPhoto, page]);
 
-  async function fetchResult(query, page) {
+  async function fetchResult(searchPhoto, page) {
     try {
-      await fetchPhoto(query, page).then(result => {
+      await fetchPhoto(searchPhoto, page).then(result => {
         const data = result.data;
         const photos = data.hits;
         const total = data.totalHits;
@@ -77,6 +56,11 @@ const App = () => {
   }
 
   const onSubmit = query => {
+    if (query === searchPhoto) {
+      return Notiflix.Notify.warning(
+        `Enter another word, we already found images for ${query.toUpperCase()}.`
+      );
+    }
     setSearchPhoto(query);
     setPage(1);
     setPhotos([]);
@@ -95,6 +79,7 @@ const App = () => {
   return (
     <div>
       <Searchbar onSubmit={onSubmit} />
+
       <div className={css.container}>
         {isLoading && <Loader />}
         <ImageGallery items={photos} showModal={toggleModal} />

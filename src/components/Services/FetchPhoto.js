@@ -4,7 +4,7 @@ import Notiflix from 'notiflix';
 const BASE_URL = 'https://pixabay.com/api/';
 const API_KEY = '40251499-e33a4520fef95d2a86c463901';
 
-export async function fetchPhoto(searchPhoto, page) {
+async function fetchPhoto(searchPhoto, page) {
   const searchParams = new URLSearchParams({
     key: API_KEY,
     q: searchPhoto,
@@ -23,3 +23,5 @@ export async function fetchPhoto(searchPhoto, page) {
   }
   return response;
 }
+
+export default fetchPhoto;

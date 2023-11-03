@@ -16,13 +16,6 @@ const Modal = ({ alt, src, closeModal }) => {
       window.removeEventListener('keydown', escPress);
     };
   }, [closeModal]);
-  // componentDidMount() {
-  //   window.addEventListener('keydown', this.escPress);
-  // }
-
-  // componentWillUnmount() {
-  //
-  // }
 
   const backdropClick = e => {
     if (e.currentTarget === e.target) {
