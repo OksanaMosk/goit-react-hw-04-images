@@ -1,44 +1,44 @@
-import { Component } from 'react';
 import css from './Modal.module.css';
 import { createPortal } from 'react-dom';
-
+import { useEffect } from 'react';
 const modalRoot = document.querySelector('#root');
-class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.escPress);
-  }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.escPress);
-  }
+const Modal = ({ alt, src, closeModal }) => {
+  useEffect(() => {
+    const escPress = e => {
+      if (e.code === 'Escape') {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', escPress);
 
-  escPress = e => {
-    if (e.code === 'Escape') {
-      this.props.closeModal();
-    }
-  };
+    return () => {
+      window.removeEventListener('keydown', escPress);
+    };
+  }, [closeModal]);
+  // componentDidMount() {
+  //   window.addEventListener('keydown', this.escPress);
+  // }
 
-  backdropClick = e => {
+  // componentWillUnmount() {
+  //
+  // }
+
+  const backdropClick = e => {
     if (e.currentTarget === e.target) {
-      this.props.closeModal();
+      closeModal();
     }
   };
 
-  render() {
-    return createPortal(
-      <div className={css.overlay} onClick={this.backdropClick}>
-        <div className={css.modal}>
-          <img
-            className={css.modalPicture}
-            src={this.props.src}
-            alt={this.props.alt}
-          />
-          <p className={css.modalTag}>{this.props.alt}</p>
-        </div>
-      </div>,
-      modalRoot
-    );
-  }
-}
+  return createPortal(
+    <div className={css.overlay} onClick={backdropClick}>
+      <div className={css.modal}>
+        <img className={css.modalPicture} src={src} alt={alt} />
+        <p className={css.modalTag}>{alt}</p>
+      </div>
+    </div>,
+    modalRoot
+  );
+};
 
 export default Modal;

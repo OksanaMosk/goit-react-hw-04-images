@@ -3,6 +3,7 @@ import Searchbar from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import Modal from './Modal/Modal';
+import React from 'react';
 
 import Loader from './Loader/Loader';
 import Notiflix from 'notiflix';
@@ -10,14 +11,14 @@ import css from './App.module.css';
 import { useState, useEffect } from 'react';
 
 const App = () => {
-  const { searchPhoto, setSearchPhoto } = useState('');
-  const { page, setPage } = useState(1);
-  const { photos, setPhotos } = useState([]);
-  const { isLoading, setIsLoading } = useState(false);
-  const { showLoadMore, setShowLoadMore } = useState(false);
-  const { showModal, setShowModal } = useState(false);
-  const { imageTags, setImageTags } = useState(null);
-  const { largeImageURL, setLargeImageURL } = useState([]);
+  const [searchPhoto, setSearchPhoto] = useState('');
+  const [page, setPage] = useState(1);
+  const [photos, setPhotos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showLoadMore, setShowLoadMore] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [imageTags, setImageTags] = useState(null);
+  const [largeImageURL, setLargeImageURL] = useState([]);
 
   // state = {
   //   searchPhoto: '',
@@ -45,6 +46,7 @@ const App = () => {
     }
     setIsLoading(true);
     fetchResult(searchPhoto, page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchPhoto, page]);
 
   async function fetchResult(query, page) {
@@ -56,18 +58,16 @@ const App = () => {
         const lastPhotos = total - 12 * page;
 
         if (photos.length === 0) {
-          setShowModal(false);
-          Notiflix.Notify.failure(
-            'Sorry, there are no images. Please try again.'
-          );
+          setShowLoadMore(false);
+          Notiflix.Notify.failure('There are no images. Please try again.');
           return;
         } else {
           setPhotos(prevPhotos => [...prevPhotos, ...photos]);
         }
-        lastPhotos > 0 ? setShowLoadMore(true) : setShowLoadMore(false);
         if (photos.length > 0 && page === 1) {
           Notiflix.Notify.success(`Yeeesss! We found ${total} images.`);
         }
+        lastPhotos > 0 ? setShowLoadMore(true) : setShowLoadMore(false);
       });
     } catch (error) {
       Notiflix.Notify.failure(' Oooops...Some error occured...');
@@ -76,16 +76,11 @@ const App = () => {
     }
   }
 
-  const onSubmit = FormData => {
-    const { query } = FormData;
-    setSearchPhoto({ searchPhoto: query, page: 1, photos: [] });
+  const onSubmit = query => {
+    setSearchPhoto(query);
+    setPage(1);
+    setPhotos([]);
   };
-
-  // const onSubmit = query => {
-  //   setSearchPhoto(query);
-  //   page(1);
-  //   photos([]);
-  // };
 
   const onLoadMoreClick = () => {
     setPage(prevPage => prevPage + 1);

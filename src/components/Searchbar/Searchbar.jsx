@@ -3,11 +3,11 @@ import Notiflix from 'notiflix';
 import css from './Searchbar.module.css';
 
 const Searchbar = ({ onSubmit }) => {
-  const { query, setQuery } = useState('');
+  const [query, setQuery] = useState('');
 
   const handleChange = event => {
     const query = event.currentTarget.value;
-    setQuery({ query: query });
+    setQuery(query);
   };
 
   const handleSubmit = event => {
@@ -18,7 +18,7 @@ const Searchbar = ({ onSubmit }) => {
     }
 
     onSubmit(query);
-    setQuery({ query: '' });
+    setQuery('');
   };
 
   return (
